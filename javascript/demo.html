@@ -6,17 +6,25 @@
 	<script typ="text/javascript" src="proxy.js"></script>
 	<script typ="text/javascript">
 	// <![CDATA[
-	Object.prototype.delay = function(milliseconds) {
+	Object.prototype.doSthAsync = function() {
 		var proxy = new Proxy(this);
 		window.setTimeout(function() {
 			proxy.proxyInvoke();
-		}, milliseconds);
+		}, 1000);
+		return proxy;
+	};
+	
+	Object.prototype.doYetAnotherAsyncThing = function() {
+		var proxy = new Proxy(this);
+		window.setTimeout(function() {
+			proxy.proxyInvoke();
+		}, 500);
 		return proxy;
 	};
 	// ]]>
 	</script>
 </head>
 <body>
-<a href="#" onclick="window.delay(1000).delay(1000).alert('This text is 2*1 second delayed. Pure magic!');">show delayed alert</a>
+<a href="#" onclick="window.doSthAsync().doYetAnotherAsyncThing().alert('All Preconditions are fulfilled. Executing the alert now. Pure magic!');">show alert, as soon as each async operation finished.</a>
 </body>
 </html>
