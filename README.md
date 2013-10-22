@@ -1,4 +1,4 @@
-proxy-stacking
+proxy-chaining
 ==============
 
 Using the proxy design pattern for method invocation redirection. Useful for asynchronous calls, interceptors, ...
@@ -11,6 +11,15 @@ The goal of this project is to provide this pattern for multiple languages capab
 ``` javascript
 myObject.delay(3000).performMethod();
 myObject.loadAjax("/example/resource").doStuff();
+// and this is why I call it proxy chaining:
+myObject.assertLoggedIn(user).uploadData(data).showConfirmationMessage();
 ```
 
-## Further languages will follow.
+## TODO
+
+- Further languages
+- One readme per language subdirectory
+
+## License
+
+Distributed under the MIT license. See the LICENSE file for more info.

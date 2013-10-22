@@ -2,12 +2,14 @@
  * MIT license (full version in LICENSE file).
  * Copyright 2013 sebastianstenzel.de
  *
- * Minimum requirements: Javascript 1.3
+ * Minimum requirements: Javascript 1.4
  */
-var Proxy = function(target) {
-	this.proxyTarget = target;
+var Proxy = function(proxyTarget) {
+	this.proxyTarget = proxyTarget;
 	this.proxyMethod = null;
 	this.proxyMethodArguments = null;
+	this.proxyChain = false;
+	this.proxyChainShouldInvoke = false;
 	
 	var createProxyMethod = function(method) {
 		return function() {
@@ -16,9 +18,9 @@ var Proxy = function(target) {
 		};
 	};
 	
-	for (key in target) {
-		if (typeof target[key] === 'function') {
-			this[key] = createProxyMethod(target[key]);
+	for (key in proxyTarget) {
+		if (typeof proxyTarget[key] === 'function' && this[key] === undefined) {
+			this[key] = createProxyMethod(proxyTarget[key]);
 		}
 	}
 	
@@ -26,6 +28,17 @@ var Proxy = function(target) {
 		if (!bind) {
 			bind = this.proxyTarget;
 		}
-		this.proxyMethod.apply(bind, this.proxyMethodArguments);
+		if (this.proxyMethod == null && this.proxyChain) {
+			this.proxyChainShouldInvoke = true;
+		} else {
+			this.proxyMethod.apply(bind, this.proxyMethodArguments);
+		}
+		if (bind instanceof Proxy && bind.proxyChainShouldInvoke) {
+			bind.proxyInvoke();
+		}
+	}
+	
+	if (proxyTarget instanceof Proxy) {
+		proxyTarget.proxyChain = true;
 	}
 };
