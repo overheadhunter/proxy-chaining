@@ -1,0 +1,22 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+	<title>Proxy Stacking Demo</title>
+	<script typ="text/javascript" src="proxy.js"></script>
+	<script typ="text/javascript">
+	// <![CDATA[
+	Object.prototype.delay = function(milliseconds) {
+		var proxy = new Proxy(this);
+		window.setTimeout(function() {
+			proxy.proxyInvoke();
+		}, milliseconds);
+		return proxy;
+	};
+	// ]]>
+	</script>
+</head>
+<body>
+<a href="#" onclick="window.delay(2000).alert('This text is 2 seconds delayed. Pure magic!');">show delayed alert</a>
+</body>
+</html>
