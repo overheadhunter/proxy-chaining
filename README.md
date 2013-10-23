@@ -17,6 +17,7 @@ myObject.validateSession(user).uploadData(data).showConfirmationMessage();
 
 ## TODO
 
+- actual chaining
 - Further languages
 - One readme per language subdirectory
 
