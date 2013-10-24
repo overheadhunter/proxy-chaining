@@ -6,25 +6,31 @@
 	<script typ="text/javascript" src="proxy.js"></script>
 	<script typ="text/javascript">
 	// <![CDATA[
-	Object.prototype.doSthAsync = function() {
-		var proxy = new Proxy(this);
+	Object.prototype.delay = function(milliseconds) {
+		console.log(this + ": delay " + milliseconds);
+		var proxy = this.getInvocationProxy();
 		window.setTimeout(function() {
 			proxy.proxyInvoke();
-		}, 1000);
+		}, milliseconds);
 		return proxy;
 	};
 	
-	Object.prototype.doYetAnotherAsyncThing = function() {
-		var proxy = new Proxy(this);
-		window.setTimeout(function() {
-			proxy.proxyInvoke();
-		}, 500);
-		return proxy;
+	// MSIE doesn't care about ECMA specs, so lets do a workaround:
+	// - MSIE thinks, that window is not an Object
+	// - also there is no 'alert', if you foreach over the fields of window
+	var win = {
+		alert: function(str) {
+			window.alert(str);
+		}
 	};
-	// ]]>
+	if (!console) {
+		console = {log:function(){}};
+	}
 	</script>
 </head>
 <body>
-<a href="#" onclick="window.doSthAsync().doYetAnotherAsyncThing().alert('All Preconditions are fulfilled. Executing the alert now. Pure magic!');">show alert, as soon as each async operation finished.</a>
+<p>When clicking on the following links, the following will happen: wait, wait, wait, alert ;)</p>
+<p><a href="#" onclick="win.delay(1300).delay(500).delay(700).alert('Waited 1.3 + 0.5 + 0.7 seconds. Executing the alert now. Pure magic!\nBtw: You should consider using a different browser.');">I use MSIE.</a></p>
+<p><a href="#" onclick="window.delay(1300).delay(500).delay(700).alert('Waited 1.3 + 0.5 + 0.7 seconds. Executing the alert now. Pure magic!');">I use a good Browser.</a></p>
 </body>
 </html>
