@@ -4,41 +4,54 @@
  *
  * Minimum requirements: Javascript 1.4
  */
+ 
+ Object.prototype.getInvocationProxy = function() {
+	if (!(this.invocationProxy instanceof Proxy)) {
+		this.invocationProxy = new Proxy(this);
+	}
+	return this.invocationProxy;
+};
+ 
 var Proxy = function(proxyTarget) {
-	this.proxyTarget = proxyTarget;
-	this.proxyMethod = null;
-	this.proxyMethodArguments = null;
-	this.proxyChain = false;
-	this.proxyChainShouldInvoke = false;
+	this.proxyMethodNameQueue = [];
+	this.proxyArgumentsQueue = [];
 	
-	var createProxyMethod = function(method) {
+	var createProxyMethod = function(key) {
 		return function() {
-			this.proxyMethod = method;
-			this.proxyMethodArguments = arguments;
+			console.log("[SCHEDULE] " + proxyTarget + "." + key + "()");
+			this.proxyMethodNameQueue.push(key);
+			this.proxyArgumentsQueue.push(arguments);
+			return this;
 		};
 	};
 	
+	this.proxyInvoke = function() {
+		if (this.proxyMethodNameQueue.length == 0) {
+			throw "proxyQueueEmptyError";
+		}
+		var methodName = this.proxyMethodNameQueue.shift();
+		var args = this.proxyArgumentsQueue.shift();
+		var method = proxyTarget[methodName];
+		
+		console.log("[INVOKE] " + proxyTarget + "." + methodName + "()");
+		
+		method.apply(proxyTarget, args);
+	}
+	
+	var reservedNames = ["proxyMethodQueue", "proxyArgumentsQueue", "proxyInvoke"];
 	for (key in proxyTarget) {
-		if (typeof proxyTarget[key] === 'function' && this[key] === undefined) {
-			this[key] = createProxyMethod(proxyTarget[key]);
+		if (typeof proxyTarget[key] === 'function' && reservedNames.indexOf(key) === -1) {
+			this[key] = createProxyMethod(key);
 		}
-	}
-	
-	this.proxyInvoke = function(bind) {
-		if (!bind) {
-			bind = this.proxyTarget;
-		}
-		if (this.proxyMethod == null && this.proxyChain) {
-			this.proxyChainShouldInvoke = true;
-		} else {
-			this.proxyMethod.apply(bind, this.proxyMethodArguments);
-		}
-		if (bind instanceof Proxy && bind.proxyChainShouldInvoke) {
-			bind.proxyInvoke();
-		}
-	}
-	
-	if (proxyTarget instanceof Proxy) {
-		proxyTarget.proxyChain = true;
 	}
 };
+
+// MSIE:
+if (!Array.prototype.indexOf) {
+	Array.prototype.indexOf = function(obj, start) {
+		 for (var i = (start || 0), j = this.length; i < j; i++) {
+			 if (this[i] === obj) { return i; }
+		 }
+		 return -1;
+	}
+}
